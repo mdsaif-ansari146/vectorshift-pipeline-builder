@@ -1,0 +1,160 @@
+// BaseNode.js - Abstraction for all node types
+
+import { Handle, Position } from 'reactflow';
+
+const NODE_COLORS = {
+  customInput: { header: '#6366f1', light: '#eef2ff', border: '#a5b4fc' },
+  customOutput: { header: '#10b981', light: '#ecfdf5', border: '#6ee7b7' },
+  llm:          { header: '#f59e0b', light: '#fffbeb', border: '#fcd34d' },
+  text:         { header: '#3b82f6', light: '#eff6ff', border: '#93c5fd' },
+  apiCall:      { header: '#8b5cf6', light: '#f5f3ff', border: '#c4b5fd' },
+  filter:       { header: '#ef4444', light: '#fef2f2', border: '#fca5a5' },
+  condition:    { header: '#f97316', light: '#fff7ed', border: '#fdba74' },
+  math:         { header: '#06b6d4', light: '#ecfeff', border: '#67e8f9' },
+  note:         { header: '#64748b', light: '#f8fafc', border: '#cbd5e1' },
+};
+
+const ICONS = {
+  customInput: '📥',
+  customOutput: '📤',
+  llm: '🤖',
+  text: '📝',
+  apiCall: '🌐',
+  filter: '🔍',
+  condition: '🔀',
+  math: '🔢',
+  note: '📌',
+};
+
+export const BaseNode = ({
+  id,
+  nodeType,
+  title,
+  inputs = [],      // [{ id, label, style }]
+  outputs = [],     // [{ id, label, style }]
+  children,
+  minWidth = 220,
+  style = {},
+}) => {
+  const colors = NODE_COLORS[nodeType] || NODE_COLORS.text;
+  const icon = ICONS[nodeType] || '⚙️';
+
+  return (
+    <div
+      style={{
+        minWidth,
+        background: '#ffffff',
+        border: `1.5px solid ${colors.border}`,
+        borderRadius: 12,
+        boxShadow: '0 4px 16px rgba(0,0,0,0.10)',
+        fontFamily: "'Inter', 'Segoe UI', sans-serif",
+        fontSize: 13,
+        overflow: 'visible',
+        position: 'relative',
+        ...style,
+      }}
+    >
+      {/* Header */}
+      <div
+        style={{
+          background: colors.header,
+          borderRadius: '10px 10px 0 0',
+          padding: '8px 12px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 7,
+        }}
+      >
+        <span style={{ fontSize: 14 }}>{icon}</span>
+        <span style={{ color: '#fff', fontWeight: 600, fontSize: 13, letterSpacing: 0.2 }}>
+          {title}
+        </span>
+      </div>
+
+      {/* Body */}
+      <div style={{ padding: '10px 12px', background: colors.light, borderRadius: '0 0 10px 10px' }}>
+        {children}
+      </div>
+
+      {/* Input Handles (left side) */}
+      {inputs.map((input, i) => (
+        <div key={input.id}>
+          <Handle
+            type="target"
+            position={Position.Left}
+            id={input.id}
+            style={{
+              top: inputs.length === 1
+                ? '50%'
+                : `${20 + (i * 60) / Math.max(inputs.length - 1, 1)}%`,
+              background: colors.header,
+              width: 10,
+              height: 10,
+              border: '2px solid white',
+              boxShadow: '0 0 0 1px ' + colors.border,
+              ...(input.style || {}),
+            }}
+          />
+          {input.label && (
+            <span
+              style={{
+                position: 'absolute',
+                left: 14,
+                top: inputs.length === 1
+                  ? 'calc(50% - 8px)'
+                  : `calc(${20 + (i * 60) / Math.max(inputs.length - 1, 1)}% - 8px)`,
+                fontSize: 10,
+                color: '#6b7280',
+                pointerEvents: 'none',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {input.label}
+            </span>
+          )}
+        </div>
+      ))}
+
+      {/* Output Handles (right side) */}
+      {outputs.map((output, i) => (
+        <div key={output.id}>
+          <Handle
+            type="source"
+            position={Position.Right}
+            id={output.id}
+            style={{
+              top: outputs.length === 1
+                ? '50%'
+                : `${20 + (i * 60) / Math.max(outputs.length - 1, 1)}%`,
+              background: colors.header,
+              width: 10,
+              height: 10,
+              border: '2px solid white',
+              boxShadow: '0 0 0 1px ' + colors.border,
+              ...(output.style || {}),
+            }}
+          />
+          {output.label && (
+            <span
+              style={{
+                position: 'absolute',
+                right: 14,
+                top: outputs.length === 1
+                  ? 'calc(50% - 8px)'
+                  : `calc(${20 + (i * 60) / Math.max(outputs.length - 1, 1)}% - 8px)`,
+                fontSize: 10,
+                color: '#6b7280',
+                pointerEvents: 'none',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {output.label}
+            </span>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+};
+
+export default BaseNode;
